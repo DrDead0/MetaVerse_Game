@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { default: expect } = require('expect');
 const { beforeAll } = require('jest-circus');
+const { test } = require('picomatch');
 const { describe } = require('yargs');
 const backend_url = "http://localhost:3000";
 describe("Authentication", () => {
@@ -55,7 +56,7 @@ describe("Authentication", () => {
 });
 
 //this is the second describe for UserInformation related endpoints --By Ashish Chaurasiya;
-describe("user Information", () => {
+describe("user information endpoint  ", () => {
   let token;
   let avatarId;
   beforeAll(async()=>{
@@ -66,19 +67,15 @@ describe("user Information", () => {
       username,
       password,
       type: "admin"
-    })
+    });
     const response = await axios.post(`${backend_url}/api/v1/signin`,{
       username,
       password
-    }) 
+    });
     token = response.data.token;
     const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
       "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
       "name": "test-avatar",  
-    },{
-      headers:{
-        "Authorization":`Bearer ${token}`
-      }
     });
     avatarId = avatarResponse.data.avatarId;
   });
@@ -91,16 +88,6 @@ describe("user Information", () => {
     expect(response.status).toBe(400);
   });
   test('user can update their metadata with right avatar id',async()=>{
-    const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
-      "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
-      "name": "test-avatar",  
-    },{
-      headers:{
-        "Authorization":`Bearer ${token}`
-      }
-    });
-    avatarId = avatarResponse.data.avatarId;
-
     const response = await axios.post(`${backend_url}/api/v1/user/metadata`, {
       avatarId
     }, {
@@ -110,21 +97,46 @@ describe("user Information", () => {
     });
     expect(response.status).toBe(200);
   });
-  test('test3',()=>{
-    // Empty test
+  test("user is not able to update metadata if the auth header is not present", async () => {
+    const response = await axios.post(`${backend_url}/api/v1/user/metadata`,{
+      avatarId
+    })
+    expect(response.status).toBe(403);
   });
 });
 
 describe("User Avatar information",()=>{
   let token;
   let avatarId;
-  beforeAll("",async()=>{
+  let userId;
 
+  beforeAll("",async()=>{
+    const username = `ashish-${Math.random()}`
+    const password ="123456"
+
+   const signupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
+      username,
+      password,
+      type: "admin"
+    })
+    userId = signupResponse.data.userId;
+
+    const response = await axios.post(`${backend_url}/api/v1/signin`,{
+      username,
+      password
+    }) 
+    token = response.data.token;
+    const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
+      "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
+      "name": "test-avatar",  
+    });
+    avatarId = avatarResponse.data.avatarId;
   })
-  test("test1",()=>{
-    
+  test("user has not uploaded avatar",()=>{
+     
   })
 })
 
 
-//meow meow 
+
+//meow meow
