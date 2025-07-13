@@ -132,9 +132,19 @@ describe("User Avatar information",()=>{
     });
     avatarId = avatarResponse.data.avatarId;
   })
-  test("user has not uploaded avatar",()=>{
-     
+
+  test("Get back avatar information for a user",async()=>{
+     const response = await axios.get(`${backend_url}/api/v1/user/metadata/bulk?ids=[${userId}]`)
+     expect(response.data.avatars.length).toBe(1);
+     expect(response.data.avatars[0].userId).toBeDefined();
+
   })
+
+  test("Available avatar lists the recently created avatar", async () => {
+    const response = await axios.get(`${backend_url}/api/v1/user/avatars`);
+    expect(response.data.avatars.length).toBe(1)
+    const currentAvatar =  response.data.avatars.find(x=>x.id ==avatarId);
+    expect(currentAvatar).toBeDefined();
 })
 
 
