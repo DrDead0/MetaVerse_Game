@@ -11,13 +11,13 @@ describe("Authentication", () => {
   test('user is able to sign up only once ', async () => {
     const username = "Ashish" + Math.random();
     const password = "123456";
-    const response = await axios.post(`${backend_url}/api/v1/user/signup`, {
+    const response = await axios.post(`${backend_url}/api/v1/signup`, {
       username,
       password,
       type: "admin"
     });
     expect(response.status).toBe(200);
-    const updated_response = await axios.post(`${backend_url}/api/v1/user/signup`, {
+    const updated_response = await axios.post(`${backend_url}/api/v1/signup`, {
       username,
       password,
       type: "admin"
@@ -27,7 +27,7 @@ describe("Authentication", () => {
   
   test('Signup request fails if username is empty ', async()=>{
     const password = "123456";
-    const response = await axios.post(`${backend_url}/api/v1/user/signup`, {
+    const response = await axios.post(`${backend_url}/api/v1/signup`, {
       password
     });
     expect(response.status).toBe(400);
@@ -35,7 +35,7 @@ describe("Authentication", () => {
   test('signin succeeds if the username and password are valid', async()=>{
     const username= `ashish-${Math.random()}`;
     const password = "123456";
-    await axios.post(`${backend_url}/api/v1/user/signup`, {
+    await axios.post(`${backend_url}/api/v1/signup`, {
       username,
       password,
       type: "admin"
@@ -66,7 +66,7 @@ describe("user information endpoint  ", () => {
     const username = `ashish-${Math.random()}`
     const password ="123456"
 
-    await axios.post(`${backend_url}/api/v1/user/signup`,{
+    await axios.post(`${backend_url}/api/v1/signup`,{
       username,
       password,
       type: "admin"
@@ -117,7 +117,7 @@ describe("User Avatar information",()=>{
     const username = `ashish-${Math.random()}`
     const password ="123456"
 
-   const signupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
+   const signupResponse =  await axios.post(`${backend_url}/api/v1/signup`,{
       username,
       password,
       type: "admin"
@@ -129,7 +129,7 @@ describe("User Avatar information",()=>{
       password
     }) 
     token = response.data.token;
-    const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
+    const avatarResponse = await axios.post(`${backend_url}/api/v1/avatar`, {
       "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
       "name": "test-avatar",  
     });
@@ -210,7 +210,7 @@ describe("space information",()=>{
         const map = await axios.post(`${backend_url}/api/v1/admin/map`,{
           "thumbnail": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
           "dimensions":"100x200",
-          "defultElements":[
+          "defaultElements":[
             {
               elementId:elementId,
               x:20,
