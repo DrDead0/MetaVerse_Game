@@ -32,6 +32,7 @@ describe("Authentication", () => {
     });
     expect(response.status).toBe(400);
   });
+  
   test('signin succeeds if the username and password are valid', async()=>{
     const username= `ashish-${Math.random()}`;
     const password = "123456";
@@ -47,6 +48,7 @@ describe("Authentication", () => {
     expect(response.status).toBe(200);
     expect(response.data.token).toBeDefined();
   });
+  
   test('signin fails if the username and password are invalid',async()=>{
     const username = `ashish-${Math.random()}`;
     const password = "123456";
@@ -62,6 +64,7 @@ describe("Authentication", () => {
 describe("user information endpoint  ", () => {
   let token;
   let avatarId;
+  
   beforeAll(async()=>{
     const username = `ashish-${Math.random()}`
     const password ="123456"
@@ -86,6 +89,7 @@ describe("user information endpoint  ", () => {
     });
     avatarId = avatarResponse.data.avatarId;
   });
+  
   test("user can't update their metadata with a wrong avatar ID",async()=>{
     const response = await axios.post(`${backend_url}/api/v1/user/metadata`,{
        avatarId: "123456789"},{
@@ -94,6 +98,7 @@ describe("user information endpoint  ", () => {
         });
     expect(response.status).toBe(400);
   });
+  
   test('user can update their metadata with right avatar id',async()=>{
     const response = await axios.post(`${backend_url}/api/v1/user/metadata`, {
       avatarId
@@ -104,6 +109,7 @@ describe("user information endpoint  ", () => {
     });
     expect(response.status).toBe(200);
   });
+  
   test("user is not able to update metadata if the auth header is not present", async () => {
     const response = await axios.post(`${backend_url}/api/v1/user/metadata`,{
       avatarId
@@ -152,7 +158,6 @@ describe("User Avatar information",()=>{
      })
      expect(response.data.avatars.length).toBe(1);
      expect(response.data.avatars[0].userId).toBeDefined();
-
   })
 
   test("Available avatar lists the recently created avatar", async () => {
@@ -167,7 +172,6 @@ describe("User Avatar information",()=>{
   });
 });
 
-
 describe("space information",()=>{
   let token;
   let adminId;
@@ -177,6 +181,7 @@ describe("space information",()=>{
   let userId;
   let elementId;
   let element2Id;
+  
   beforeAll(async()=>{
     const username = `ashish-${Math.random()}`
     const password ="123456"
@@ -187,7 +192,6 @@ describe("space information",()=>{
       type: "admin"
     })
 
-  
     adminId = signupResponse.data.userId;
 
     const response = await axios.post(`${backend_url}/api/v1/signin`,{
@@ -201,7 +205,6 @@ describe("space information",()=>{
       password,
       type: "user"
     });
-    
     
     userId = userSignupResponse.data.userId;
 
@@ -266,6 +269,7 @@ describe("space information",()=>{
         });
       mapId = map.data.mapId;
   })
+  
   test("User is able to create space",async()=>{
     const response = await axios.post(`${backend_url}/api/v1/space`, {
       "name": "Test",
@@ -277,7 +281,6 @@ describe("space information",()=>{
       }
     });
     expect(response.data.spaceId).toBeDefined();
-
   })
   
   test("User is able to create space without map id(empty space)",async()=>{
@@ -317,6 +320,7 @@ describe("space information",()=>{
     );
     expect(response.status).toBe(400);
   })
+  
   test("user should be able to delete space that does exist",async()=>{
     const response = await axios.post(`${backend_url}/api/v1/space`, {
       "name": "Test",
@@ -337,6 +341,7 @@ describe("space information",()=>{
     );
     expect(delResponse.status).toBe(200);
   })
+  
   // test("Get list of user space",async()=>{
   //   const response = await axios.post(`${backend_url}/api/v1/space`, {
   //     "name": "Test",
@@ -355,9 +360,10 @@ describe("space information",()=>{
   //       }
   //     }
   //   );
-    //   expect(delResponse.status).toBe(200);
+  //   expect(delResponse.status).toBe(200);
   // })
-    test("use should not be able to delete space that doesn't belong to them",async()=>{
+  
+  test("use should not be able to delete space that doesn't belong to them",async()=>{
     const response = await axios.post(`${backend_url}/api/v1/space`, {
       "name": "Test",
       "dimension":"100x200",
@@ -377,12 +383,13 @@ describe("space information",()=>{
       }
     );
     expect(delResponse.status).toBe(400);
-
   })
+  
   test("admin has no space initially",async()=>{
     const response = axios.get(`${backend_url}/api/v1/space/all`,)
     expect(response.data.spaces.length).toBe(0);
   })
+  
   test("admin has no space initially",async()=>{
     const spaceCreateResponse = axios.post(`${backend_url}/api/v1/space`,{
       "name": "Test",
@@ -399,9 +406,7 @@ describe("space information",()=>{
     // expect(filteredSpace.id).toBeDefined();
     expect(response.data.spaces.length).toBe(1);
   });
-  
 })
-
 
 describe("Arena endpoints",()=>{
   let userToken;
@@ -411,82 +416,57 @@ describe("Arena endpoints",()=>{
   let mapId;
   let elementId;
   let element2Id;
+  let spaceId;
 
   beforeAll(async()=>{
-    // const signupResponse = await axios.post(`${backend_url}/api/v1/signup`, {
-    //   username: `ashish-${Math.random()}`,
-    //   password:`123456`,
-    //   type:"admin"
-    // })
-    // adminId = signupResponse.data.userId;
+    const username = `ashish-${Math.random()}`
+    const password ="123456"
 
-    // const signinResponse = await axios.post(`${backend_url}/api/v1/signin`, {
-    //   username: signupResponse.data.username,
-    //   password:`123456`
-    // })
-    // adminToken = signinResponse.data.token;
+    const signupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
+      username,
+      password,
+      type: "admin"
+    })
 
-    // const userSignupResponse = await axios.post(`${backend_url}/api/v1/signup`, {
-    //   username:`ashish-${Math.random()}`,
-    //   password:"123456",
-    //   type:"admin"
-    // })
-    // userId = userSignupResponse.data.userId;
-    // const userSigninResponse =  await axios.post(`${backend_url}/api/v1/signin`, {
-    //   username: userSignupResponse.data.username,
-    //   password:"123456"
-    // })
-    // userToken = userSigninResponse.data.token;
+    adminId = signupResponse.data.userId;
 
-    let token;
-    let adminId;
-    let adminToken;
-    // let userToken;
-    let mapId;
-    let userId;
-    let elementId;
-    let element2Id;
-    let spaceId;
-    beforeAll(async()=>{
-      const username = `ashish-${Math.random()}`
-      const password ="123456"
-  
-     const signupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
-        username,
-        password,
-        type: "admin"
-      })
-  
+    const response = await axios.post(`${backend_url}/api/v1/signin`,{
+      username,
+      password
+    }) 
+    adminToken = response.data.token;
+
+    const userSignupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
+      username: username+ "-user",
+      password,
+      type: "user"
+    });
     
-      adminId = signupResponse.data.userId;
-  
-      const response = await axios.post(`${backend_url}/api/v1/signin`,{
-        username,
-        password
-      }) 
-      adminToken = response.data.token;
-  
-      const userSignupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
-        username: username+ "-user",
-        password,
-        type: "user"
+    userId = userSignupResponse.data.userId;
+
+    const userSigninResponse = await axios.post(`${backend_url}/api/v1/signin`,{
+      username,
+      password
+    }) 
+    userToken = userSigninResponse.data.token;
+    
+    // const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
+    //   "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
+    //   "name": "test-avatar",  
+    // });
+    // avatarId = avatarResponse.data.avatarId;
+    const element1 = await axios.post(`${backend_url}/api/v1/admin/element`, {
+      "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
+      "name": "test-avatar",
+      "width":1,
+      "height":1,
+      "static": true},{
+        headers: {
+          "Authorization": `Bearer ${adminToken}`
+        }
       });
-      
-      
-      userId = userSignupResponse.data.userId;
-  
-      const userSigninResponse = await axios.post(`${backend_url}/api/v1/signin`,{
-        username,
-        password
-      }) 
-      userToken = userSigninResponse.data.token;
-      
-      // const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
-      //   "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
-      //   "name": "test-avatar",  
-      // });
-      // avatarId = avatarResponse.data.avatarId;
-      const element1 = await axios.post(`${backend_url}/api/v1/admin/element`, {
+        
+    const element2 = await axios.post(`${backend_url}/api/v1/admin/element`, {
         "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
         "name": "test-avatar",
         "width":1,
@@ -495,50 +475,38 @@ describe("Arena endpoints",()=>{
           headers: {
             "Authorization": `Bearer ${adminToken}`
           }
+        })
+        elementId = element1.data.elementId;
+        element2Id = element2.data.elementId;
+        const map = await axios.post(`${backend_url}/api/v1/admin/map`,{
+          "thumbnail": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
+          "dimensions":"100x200",
+          "defaultElements":[
+            {
+              elementId:elementId,
+              x:20,
+              y:2
+            },
+            {
+              elementId:elementId,
+              x:18,
+              y:20
+            },
+            {
+              elementId:element2Id,
+              x:19,
+              y:20
+            }
+        ]
+        },{
+          headers: {
+            "Authorization": `Bearer ${adminToken}`
+          }
         });
-        
-      const element2 = await axios.post(`${backend_url}/api/v1/admin/element`, {
-          "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
-          "name": "test-avatar",
-          "width":1,
-          "height":1,
-          "static": true},{
-            headers: {
-              "Authorization": `Bearer ${adminToken}`
-            }
-          })
-          elementId = element1.data.elementId;
-          element2Id = element2.data.elementId;
-          const map = await axios.post(`${backend_url}/api/v1/admin/map`,{
-            "thumbnail": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
-            "dimensions":"100x200",
-            "defaultElements":[
-              {
-                elementId:elementId,
-                x:20,
-                y:2
-              },
-              {
-                elementId:elementId,
-                x:18,
-                y:20
-              },
-              {
-                elementId:element2Id,
-                x:19,
-                y:20
-              }
-          ]
-          },{
-            headers: {
-              "Authorization": `Bearer ${adminToken}`
-            }
-          });
-        mapId = map.data.mapId;
-    })
+      mapId = map.data.mapId;
   })
+  
   test("User is able to create arena",async()=>{
     
   })
-
 })
