@@ -35,7 +35,7 @@ describe("Authentication", () => {
   test('signin succeeds if the username and password are valid', async()=>{
     const username= `ashish-${Math.random()}`;
     const password = "123456";
-    await axios.post(`${backend_url}/api/v1/signup`, {
+    await axios.post(`${backend_url}/api/v1/user/signup`, {
       username,
       password,
       type: "admin"
@@ -86,7 +86,7 @@ describe("user information endpoint  ", () => {
     const response = await axios.post(`${backend_url}/api/v1/user/metadata`,{
        avatarId: "123456789"},{
         headers:{
-          "Authorization":`Bearer ${token}`}
+          authorization:`Bearer ${token}`}
         });
     expect(response.status).toBe(400);
   });
@@ -95,7 +95,7 @@ describe("user information endpoint  ", () => {
       avatarId
     }, {
       headers: {
-        "Authorization": `Bearer ${token}`
+        authorization:`Bearer ${token}`
       }
     });
     expect(response.status).toBe(200);
@@ -117,7 +117,7 @@ describe("User Avatar information",()=>{
     const username = `ashish-${Math.random()}`
     const password ="123456"
 
-   const signupResponse =  await axios.post(`${backend_url}/api/v1/signup`,{
+   const signupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
       username,
       password,
       type: "admin"
@@ -129,7 +129,7 @@ describe("User Avatar information",()=>{
       password
     }) 
     token = response.data.token;
-    const avatarResponse = await axios.post(`${backend_url}/api/v1/avatar`, {
+    const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
       "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
       "name": "test-avatar",  
     });
@@ -179,6 +179,21 @@ describe("space information",()=>{
       password
     }) 
     adminToken = response.data.token;
+
+    const userSignupResponse =  await axios.post(`${backend_url}/api/v1/user/signup`,{
+      username,
+      password,
+      type: "admin"
+    });
+    
+    
+    userId = userSignupResponse.data.userId;
+
+    const userSigninResponse = await axios.post(`${backend_url}/api/v1/signin`,{
+      username,
+      password
+    }) 
+    userToken = userSigninResponse.data.token;
     
     // const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
     //   "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
@@ -191,22 +206,23 @@ describe("space information",()=>{
       "width":1,
       "height":1,
       "static": true},{
-        header: {
+        headers: {
           "authorization": `Bearer ${adminToken}`
         }
       });
-      const element2 = await axios.post(`${backend_url}/api/v1/admin/element`, {
+      
+    const element2 = await axios.post(`${backend_url}/api/v1/admin/element`, {
         "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
         "name": "test-avatar",
         "width":1,
         "height":1,
         "static": true},{
-          header: {
+          headers: {
             "authorization": `Bearer ${adminToken}`
           }
         })
-        elementId = element1.id;
-        element2Id = element2.id;
+        elementId = element1.data.elementId;
+        element2Id = element2.data.elementId;
         const map = await axios.post(`${backend_url}/api/v1/admin/map`,{
           "thumbnail": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
           "dimensions":"100x200",
@@ -234,5 +250,95 @@ describe("space information",()=>{
         });
       mapId = map.data.mapId;
   })
+  test("User is able to create space",async()=>{
+    const response = await axios.post(`${backend_url}/api/v1/space`, {
+      "name": "Test",
+      "dimension":"100x200",
+      "mapId": mapId
+    },{
+      headers:{
+        authorization: `Bearer ${adminToken}`
+      }
+    });
+    expect(response.data.spaceId).toBeDefined();
+
+  })
+  
+  test("User is able to create space without map id(empty space)",async()=>{
+    const response = await axios.post(`${backend_url}/api/v1/space`, {
+      "name": "Test",
+      "dimension":"100x200",
+      // "mapId": mapId
+    },{
+      headers:{
+        authorization: `Bearer ${adminToken}`
+      }
+    });
+    expect(response.data.spaceId).toBeDefined();
+  })
+  
+  test("User is not able to create space without map id and dimensions",async()=>{
+    const response = await axios.post(`${backend_url}/api/v1/space`, {
+      "name": "Test",
+      // "dimension":"100x200",
+      // "mapId": mapId
+    },{
+      headers:{
+        authorization: `Bearer ${adminToken}`
+      }
+    });
+    expect(response.status).toBe(400);
+  })
+  
+  test("User should not be able to delete a space that doesn't exist",async()=>{
+    const response = await axios.delete(
+      `${backend_url}/api/v1/space/randomIdDoesntExist`,
+      {
+        headers: {
+          authorization: `Bearer ${adminToken}`
+        }
+      }
+    );
+    expect(response.status).toBe(400);
+  })
+  test("user should be able to delete space that does exist",async()=>{
+    const response = await axios.post(`${backend_url}/api/v1/space`, {
+      "name": "Test",
+      "dimension":"100x200",
+      "mapId": mapId
+    },{
+      headers:{
+        authorization: `Bearer ${adminToken}`
+      }
+    })
+    const delResponse = await axios.delete(
+      `${backend_url}/api/v1/space/${response.data.spaceId}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminToken}`
+        }
+      }
+    );
+    expect(delResponse.status).toBe(200);
+  })
+  test("Get list of user space",async()=>{
+    const response = await axios.post(`${backend_url}/api/v1/space`, {
+      "name": "Test",
+      "dimension":"100x200",
+      "mapId": mapId
+    },{
+      headers:{
+        authorization: `Bearer ${adminToken}`
+      }
+    })
+    const delResponse = await axios.delete(
+      `${backend_url}/api/v1/space/${response.data.spaceId}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminToken}`
+        }
+      }
+    );
+    expect(delResponse.status).toBe(200);
+  })
 })
-//meow meow
