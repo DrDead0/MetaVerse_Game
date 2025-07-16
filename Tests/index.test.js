@@ -79,6 +79,10 @@ describe("user information endpoint  ", () => {
     const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
       "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
       "name": "test-avatar",  
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
     avatarId = avatarResponse.data.avatarId;
   });
@@ -86,7 +90,7 @@ describe("user information endpoint  ", () => {
     const response = await axios.post(`${backend_url}/api/v1/user/metadata`,{
        avatarId: "123456789"},{
         headers:{
-          authorization:`Bearer ${token}`}
+          Authorization:`Bearer ${token}`}
         });
     expect(response.status).toBe(400);
   });
@@ -95,7 +99,7 @@ describe("user information endpoint  ", () => {
       avatarId
     }, {
       headers: {
-        authorization:`Bearer ${token}`
+        Authorization:`Bearer ${token}`
       }
     });
     expect(response.status).toBe(200);
@@ -132,19 +136,31 @@ describe("User Avatar information",()=>{
     const avatarResponse = await axios.post(`${backend_url}/api/v1/admin/avatar`, {
       "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
       "name": "test-avatar",  
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
     avatarId = avatarResponse.data.avatarId;
   })
 
   test("Get back avatar information for a user",async()=>{
-     const response = await axios.get(`${backend_url}/api/v1/user/metadata/bulk?ids=[${userId}]`)
+     const response = await axios.get(`${backend_url}/api/v1/user/metadata/bulk?ids=[${userId}]`, {
+       headers: {
+         Authorization: `Bearer ${token}`
+       }
+     })
      expect(response.data.avatars.length).toBe(1);
      expect(response.data.avatars[0].userId).toBeDefined();
 
   })
 
   test("Available avatar lists the recently created avatar", async () => {
-    const response = await axios.get(`${backend_url}/api/v1/user/avatars`);
+    const response = await axios.get(`${backend_url}/api/v1/user/avatars`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     expect(response.data.avatars.length).toBe(1)
     const currentAvatar =  response.data.avatars.find(x=>x.id ==avatarId);
     expect(currentAvatar).toBeDefined();
@@ -156,7 +172,7 @@ describe("space information",()=>{
   let token;
   let adminId;
   let adminToken;
-  let userToken;
+  // let userToken;
   let mapId;
   let userId;
   let elementId;
@@ -207,7 +223,7 @@ describe("space information",()=>{
       "height":1,
       "static": true},{
         headers: {
-          "authorization": `Bearer ${adminToken}`
+          "Authorization": `Bearer ${adminToken}`
         }
       });
       
@@ -218,7 +234,7 @@ describe("space information",()=>{
         "height":1,
         "static": true},{
           headers: {
-            "authorization": `Bearer ${adminToken}`
+            "Authorization": `Bearer ${adminToken}`
           }
         })
         elementId = element1.data.elementId;
@@ -245,7 +261,7 @@ describe("space information",()=>{
         ]
         },{
           headers: {
-            "authorization": `Bearer ${adminToken}`
+            "Authorization": `Bearer ${adminToken}`
           }
         });
       mapId = map.data.mapId;
@@ -257,7 +273,7 @@ describe("space information",()=>{
       "mapId": mapId
     },{
       headers:{
-        authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${adminToken}`
       }
     });
     expect(response.data.spaceId).toBeDefined();
@@ -271,7 +287,7 @@ describe("space information",()=>{
       // "mapId": mapId
     },{
       headers:{
-        authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${adminToken}`
       }
     });
     expect(response.data.spaceId).toBeDefined();
@@ -284,7 +300,7 @@ describe("space information",()=>{
       // "mapId": mapId
     },{
       headers:{
-        authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${adminToken}`
       }
     });
     expect(response.status).toBe(400);
@@ -295,7 +311,7 @@ describe("space information",()=>{
       `${backend_url}/api/v1/space/randomIdDoesntExist`,
       {
         headers: {
-          authorization: `Bearer ${adminToken}`
+          Authorization: `Bearer ${adminToken}`
         }
       }
     );
@@ -308,14 +324,14 @@ describe("space information",()=>{
       "mapId": mapId
     },{
       headers:{
-        authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${adminToken}`
       }
     })
     const delResponse = await axios.delete(
       `${backend_url}/api/v1/space/${response.data.spaceId}`,
       {
         headers: {
-          authorization: `Bearer ${adminToken}`
+          Authorization: `Bearer ${adminToken}`
         }
       }
     );
@@ -328,17 +344,57 @@ describe("space information",()=>{
       "mapId": mapId
     },{
       headers:{
-        authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${adminToken}`
       }
     })
     const delResponse = await axios.delete(
       `${backend_url}/api/v1/space/${response.data.spaceId}`,
       {
         headers: {
-          authorization: `Bearer ${adminToken}`
+          Authorization: `Bearer ${adminToken}`
         }
       }
     );
     expect(delResponse.status).toBe(200);
   })
+})
+
+
+describe("Arena information",()=>{
+  let userToken;
+  let adminToken;
+  let adminId;
+  let userId;
+  let mapId;
+  let elementId;
+  let element2Id;
+
+  beforeAll(async()=>{
+    const signupResponse = await axios.post(`${backend_url}/api/v1/signup`, {
+      username: `ashish-${Math.random()}`,
+      password:`123456`,
+      type:"admin"
+    })
+    adminId = signupResponse.data.userId;
+
+    const signinResponse = await axios.post(`${backend_url}/api/v1/signin`, {
+      username: signupResponse.data.username,
+      password:`123456`
+    })
+    adminToken = signinResponse.data.token;
+
+    const userSignupResponse = await axios.post(`${backend_url}/api/v1/signup`, {
+      username:`ashish-${Math.random()}`,
+      password:"123456",
+      type:"admin"
+    })
+    userId = userSignupResponse.data.userId;
+    const userSigninResponse =  await axios.post(`${backend_url}/api/v1/signin`, {
+      username: userSignupResponse.data.username,
+      password:"123456"
+    })
+    userToken = userSigninResponse.data.token;
+
+  })
+  
 })
