@@ -503,7 +503,16 @@ describe("Arena endpoints",()=>{
             "Authorization": `Bearer ${adminToken}`
           }
         });
-      mapId = map.data.mapId;
+        const space = await axios.post(`{backend_url}/api/v1/space`,{
+          "name": "Test",
+          "dimension":"100x200",
+          "mapId": map.data.mapId
+        },{
+          headers:{
+            Authorization: `Bearer ${adminToken}`
+          }
+        })
+        mapId = map.id;
     // const map = await axios.post(`${backend_url}/api/v1/admin/space`,{
 
     // })
