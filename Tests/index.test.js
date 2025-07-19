@@ -504,6 +504,9 @@ describe("Arena endpoints",()=>{
           }
         });
       mapId = map.data.mapId;
+    // const map = await axios.post(`${backend_url}/api/v1/admin/space`,{
+
+    // })
   })
   
   test("User is able to create arena",async()=>{
