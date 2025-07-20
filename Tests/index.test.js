@@ -1,3 +1,4 @@
+const { WebSocket } = require('ws');
 const axios = require('axios');
 const { default: expect } = require('expect');
 const { response } = require('express');
@@ -5,6 +6,8 @@ const { beforeAll } = require('jest-circus');
 const { test } = require('picomatch');
 const { describe } = require('yargs');
 const backend_url = "http://localhost:3000";
+const WS_URL = "ws://localhost:3001";
+
 
 
 
@@ -60,6 +63,7 @@ describe("Authentication", () => {
     expect(response.status).toBe(403);
   });
 });
+
 
 //this is the second describe for UserInformation related endpoints --By Ashish Chaurasiya;
 describe("user information endpoint  ", () => {
@@ -119,6 +123,7 @@ describe("user information endpoint  ", () => {
   });
 });
 
+
 describe("User Avatar information",()=>{
   let token;
   let avatarId;
@@ -173,6 +178,7 @@ describe("User Avatar information",()=>{
   });
 });
 
+
 describe("space information",()=>{
   let token;
   let adminId;
@@ -220,7 +226,7 @@ describe("space information",()=>{
     //   "name": "test-avatar",  
     // });
     // avatarId = avatarResponse.data.avatarId;
-    const element1 = await axios.post(`${backend_url}/api/v1/admin/element`, {
+    const element1Response = await axios.post(`${backend_url}/api/v1/admin/element`, {
       "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
       "name": "test-avatar",
       "width":1,
@@ -231,7 +237,7 @@ describe("space information",()=>{
         }
       });
       
-    const element2 = await axios.post(`${backend_url}/api/v1/admin/element`, {
+    const element2Response = await axios.post(`${backend_url}/api/v1/admin/element`, {
         "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
         "name": "test-avatar",
         "width":1,
@@ -241,9 +247,9 @@ describe("space information",()=>{
             "Authorization": `Bearer ${adminToken}`
           }
         })
-        elementId = element1.data.elementId;
-        element2Id = element2.data.elementId;
-        const map = await axios.post(`${backend_url}/api/v1/admin/map`,{
+        elementId = element1Response.data.elementId;
+        element2Id = element2Response.data.elementId;
+        const mapResponse = await axios.post(`${backend_url}/api/v1/admin/map`,{
           "thumbnail": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
           "dimensions":"100x200",
           "defaultElements":[
@@ -268,7 +274,7 @@ describe("space information",()=>{
             "Authorization": `Bearer ${adminToken}`
           }
         });
-      mapId = map.data.mapId;
+      mapId = mapResponse.data.mapId;
   })
   
   test("User is able to create space",async()=>{
@@ -417,6 +423,7 @@ describe("space information",()=>{
   });
 })
 
+
 describe("Arena endpoints",()=>{
   let userToken;
   let adminToken;
@@ -464,7 +471,7 @@ describe("Arena endpoints",()=>{
     //   "name": "test-avatar",  
     // });
     // avatarId = avatarResponse.data.avatarId;
-    const element1 = await axios.post(`${backend_url}/api/v1/admin/element`, {
+    const element1Response = await axios.post(`${backend_url}/api/v1/admin/element`, {
       "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
       "name": "test-avatar",
       "width":1,
@@ -475,7 +482,7 @@ describe("Arena endpoints",()=>{
         }
       });
         
-    const element2 = await axios.post(`${backend_url}/api/v1/admin/element`, {
+    const element2Response = await axios.post(`${backend_url}/api/v1/admin/element`, {
         "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
         "name": "test-avatar",
         "width":1,
@@ -485,9 +492,9 @@ describe("Arena endpoints",()=>{
             "Authorization": `Bearer ${adminToken}`
           }
         })
-        elementId = element1.data.elementId;
-        element2Id = element2.data.elementId;
-        const map = await axios.post(`${backend_url}/api/v1/admin/map`,{
+        elementId = element1Response.data.elementId;
+        element2Id = element2Response.data.elementId;
+        const mapResponse = await axios.post(`${backend_url}/api/v1/admin/map`,{
           "thumbnail": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
           "dimensions":"100x200",
           "defaultElements":[
@@ -512,8 +519,8 @@ describe("Arena endpoints",()=>{
             "Authorization": `Bearer ${adminToken}`
           }
         });
-        mapId = map.data.mapId;
-        const space = await axios.post(`${backend_url}/api/v1/space`,{
+        mapId = mapResponse.data.mapId;
+        const spaceResponse = await axios.post(`${backend_url}/api/v1/space`,{
           "name": "Test",
           "dimensions":"100x200",
           "mapId":mapId
@@ -522,7 +529,7 @@ describe("Arena endpoints",()=>{
             Authorization: `Bearer ${adminToken}`
           }
         })
-        spaceId = space.data.spaceId;;
+        spaceId = spaceResponse.data.spaceId;;
         
     // const map = await axios.post(`${backend_url}/api/v1/admin/space`,{
 
@@ -611,6 +618,7 @@ describe("Arena endpoints",()=>{
     expect(response.status).toBe(400);
   })
 })
+
 
 describe("Admin endpoints",()=>{
   let adminToken;
@@ -757,6 +765,117 @@ describe("Admin endpoints",()=>{
     expect(updateElementResponse.status).toBe(200);
   })
 })
- 
+
+
+
+describe("WebSocket Test",()=>{
+  let adminToken;
+  let adminUserId;
+  let userIdToken;
+  let userId;
+  let elementId;
+  let element2Id;
+  let mapId;
+  let spaceId;
+  let ws1;
+  let ws2;
+  
+
+  async function setupHTTP(){
+    const adminSignupResponse = await axios.post(`${backend_url}/api/v1/signup`,{
+      username: `ashish-${Math.random()}`,
+      password:"123456",
+      role:"admin"
+    })
+    adminUserId = adminSignupResponse.data.userId;
+    const adminSigninResponse = await axios.post(`${backend_url}/api/v1/signin`,{
+      username: `ashish-${Math.random()}`,
+      password:"123456",
+      // type:"admin"
+    })
+    adminToken = adminSigninResponse.data.token;
+    const userSignupResponse = await axios.post(`${backend_url}/api/v1/signup`,{
+      username: `ashish-${Math.random()}+ -user`,
+      password:"123456",
+      role:"user"
+    })
+    userId = userSignupResponse.data.userId;
+    const userSigninResponse = await axios.post(`${backend_url}/api/v1/signin`,{
+      username: `ashish-${Math.random()} + -user`,
+      password:"123456"
+    });
+    userIdToken = userSigninResponse.data.token;
+    const element1Response = await axios.post(`${backend_url}/api/v1/admin/element`, {
+      "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
+      "name": "test-avatar",
+      "width":1,
+      "height":1,
+      "static": true},{
+        headers: {
+          "Authorization": `Bearer ${adminToken}`
+        }
+      });
+        
+    const element2Response = await axios.post(`${backend_url}/api/v1/admin/element`, {
+        "imageUrl": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
+        "name": "test-avatar",
+        "width":1,
+        "height":1,
+        "static": true},{
+          headers: {
+            "Authorization": `Bearer ${adminToken}`
+          }
+        })
+        elementId = element1Response.data.elementId;
+        element2Id = element2Response.data.elementId;
+        const mapResponse = await axios.post(`${backend_url}/api/v1/admin/map`,{
+          "thumbnail": "https://ik.imagekit.io/DrDead/WhatsApp%20Image%202025-06-09%20at%2021.16.21_1b3c3be5.jpg?updatedAt=1752327414741",
+          "dimensions":"100x200",
+          "defaultElements":[
+            {
+              elementId:elementId,
+              x:20,
+              y:2
+            },
+            {
+              elementId:elementId,
+              x:18,
+              y:20
+            },
+            {
+              elementId:element2Id,
+              x:19,
+              y:20
+            }
+        ]
+        },{
+          headers: {
+            "Authorization": `Bearer ${adminToken}`
+          }
+        });
+        mapId = mapResponse.data.mapId;
+        const spaceResponse = await axios.post(`${backend_url}/api/v1/space`,{
+          "name": "Test",
+          "dimensions":"100x200",
+          "mapId":mapId
+        },{
+          headers:{
+            Authorization: `Bearer ${adminToken}`
+          }
+        })
+        spaceId = spaceResponse.data.spaceId;
+  };
+  function setupWs(){
+    ws1= new WebSocket(WS_URL);
+    ws2 = new WebSocket(WS_URL);  
+  }
+
+
+
+  beforeAll(async()=>{
+    
+  })
+})
+
 
 //meow meow 
