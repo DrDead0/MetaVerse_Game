@@ -891,15 +891,19 @@ describe("WebSocket Test",()=>{
   async function setupWs(){
     ws1= new WebSocket(WS_URL);
     ws2 = new WebSocket(WS_URL);
+
+
     await new  promise(r=>{
       ws1.onopen = r;
-    }) 
-    await new  promise(r=>{
-      ws2.onopen = r;
     })
+
     ws1.onmessage = (event)=>{
       ws1message.push(JSON.parse(event.data));
     } 
+
+    await new  promise(r=>{
+      ws2.onopen = r;
+    })
     ws2.onmessage = (event)=>{
       ws2message.push(JSON.parse(event.data));
     }
@@ -911,6 +915,9 @@ describe("WebSocket Test",()=>{
       }
       
     }));
+
+    const message1 = await waitForAndPopLatestMessage(ws1message);
+
     ws2.send(JSON.stringify({
       "type":"join",
       "payload":{
@@ -942,11 +949,27 @@ describe("WebSocket Test",()=>{
         "token": userIdToken,
       }
     }));
-    const message1 = await waitForAndPopLatestMessage(ws1message);
+    
     const message2 = await waitForAndPopLatestMessage(ws2message);
+    const message3 = await waitForAndPopLatestMessage(ws1message);
+
     expect(message1.type).toBe("space-joined"); 
     expect(message2.type).toBe("space-joined"); 
-    expect(message1.payload.user.length+message2.payload.user.length).toBe(1); 
+
+    except(message1.payload.user.length).toBe(0);
+    except(message2.payload.user.length).toBe(1);
+
+    except(message3.type).toBe("space-joined");
+
+    except(message3.payload.x).toBe(message2.payload.spawn.x);
+    except(message3.payload.y).toBe(message2.payload.spawn.y);
+    
+    except(message3.payload.userId).toBe(userId)
+
+
+
+    // except(message3.payload.y).toBe("space-joined");
+    // expect(message1.payload.user.length+message2.payload.user.length).toBe(1); 
     // expect(message2.type).toBe("space-joined"); 
 
     adminX = message1.payload.spawn.x;
