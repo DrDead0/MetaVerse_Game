@@ -1,6 +1,7 @@
 import express from 'express';
+import { router } from './Routers/v1/index.router';
 const app = express();
-app.use("api/v1"); //this is prefix router and can be used in many ways and many times
+app.use("/api/v1", router); // this is prefix router and can be used in many ways and many times
 //instead of using app.get or app.post number of times
 
 
