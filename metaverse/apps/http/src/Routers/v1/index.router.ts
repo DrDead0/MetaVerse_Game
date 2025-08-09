@@ -17,11 +17,15 @@ router.post("/signin", (req: Request, res: Response) => {
 });
 
 router.get("/elements",(req,res)=>{
-    
+    res.json({
+        message:"elements"
+    })
 })
 
 router.get("/avatars",(req,res)=>{
-
+    res.json({
+        message:"avatars"
+    })
 })
 
 router.use("/user",userRouter)

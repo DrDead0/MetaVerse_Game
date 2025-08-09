@@ -3,10 +3,14 @@ export const spaceRouter = Router();
 
 
 spaceRouter.post("/", (req, res) => {  
+    res.json({
+        message:"space Created"
+    })
 });
 
 
 spaceRouter.delete("/:spaceId", (req, res) => {  
+    res.json({spaceId: req.params.spaceId})
 });
 
 
