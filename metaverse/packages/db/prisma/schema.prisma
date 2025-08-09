@@ -21,10 +21,10 @@ model User {
   id       String  @id @unique @default(cuid())
   username String  @unique
   password String
-  avatarId String
+  avatarId String?
   role     Role
   spaces   Space[]
-  Avatar   Avatar? @relation{fields:[avatarId], references:[id]}
+  Avatar   Avatar? @relation(fields: [avatarId], references: [id])
 }
 
 
@@ -35,7 +35,7 @@ model Space {
   height    Int?
   thumbnail String?
   creatorId String
-  creator   User @relation{fields:[creatorId], references:[id]}
+  creator   User @relation(fields: [creatorId], references: [id])
   space     SpaceElements[]
 }
 
@@ -46,8 +46,8 @@ model SpaceElements {
   spaceId   String
   x         Int
   y         Int
-  space     Space @relation{fields:[spaceId], references:[id]}
-  element   Element @relation{fields:[elementId], references:[id]}
+  space     Space @relation(fields: [spaceId], references: [id])
+  element   Element @relation(fields: [elementId], references: [id])
   @@unique([elementId, spaceId])
 }
 
@@ -77,8 +77,8 @@ model MapElements {
   elementId String?
   x         Int?
   y         Int?
-  map       Map @relation{fields:[mapId], references:[id]}
-  element   Element @relation{fields:[elementId], references:[id]}
+  map       Map @relation(fields: [mapId], references: [id])
+  element   Element? @relation(fields: [elementId], references: [id])
   @@unique([mapId, elementId])
 }
 
