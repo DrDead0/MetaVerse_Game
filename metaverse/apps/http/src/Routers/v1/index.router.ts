@@ -2,37 +2,80 @@ import { Router, Request, Response } from "express";
 import { userRouter } from "./user.router.js";
 import { spaceRouter } from "./space.router.js";
 import { adminRouter } from "./admin.router.js";
-import { SigninSchema } from "../../types/index.js";
+import { SignupSchema, SigninSchema } from "../../types/index.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import client from "@repo/db";
-import * as Prisma from "@prisma/client";
+import { JWT_PASSWORD } from "../../config.js";
 
 export const router = Router();
 
 router.post("/signup", async (req: Request, res: Response) => {
-    const parseData = SigninSchema.safeParse(req.body)
+    const parseData = SignupSchema.safeParse(req.body)
     if(!parseData.success){
         return res.status(400).json({
             message: "Validation Failed"
         })
     }
+    const hashedPassword = await bcrypt.hash(parseData.data.password,10)
     try{
-        await client.user.create({
+      const user =   await client.user.create({
             data:{
                 username:parseData.data.username,
-                password:parseData.data.password,
-                role: parseData.data.type === "admin" ? "ADMIN" : "USER"
+                password:hashedPassword,
+                role: parseData.data.type === "admin" ? "Admin" : "User"
             }
         })
-    }catch(err){}
-    res.json({
-        message: "signup"
-    });
+        return res.json({
+            userId: user.id
+        })
+    }catch(err){
+        console.error(err);
+        return res.status(400).json({
+            message:"User Already Exists"
+        })
+    }
 });
 
-router.post("/signin", (req: Request, res: Response) => {
-    res.json({
-        message: "signin"
-    });
+router.post("/signin", async(req: Request, res: Response) => {
+    const parseData = SigninSchema.safeParse(req.body);
+    if(!parseData.success){
+        return res.status(403).json({
+            message:"Validation Failed"
+        })
+    }
+    try{
+        const user = await client.user.findUnique({
+            where:{
+                username:parseData.data.username
+            }
+        })
+        if(!user){
+            return res.status(404).json({
+                message:"User Not Found"
+            })
+        }
+        const isValid = await bcrypt.compare(parseData.data.password, user.password);
+         if (!isValid){
+            return res.status(401).json({
+                message:"Invalid Credentials"
+            })
+        }
+       const token = await jwt.sign({
+            userId: user.id,
+            role: user.role
+       },JWT_PASSWORD);
+        return res.json({
+            token
+        })
+
+
+    }catch(err){
+        console.error(err);
+        return res.status(500).json({
+            message:"Internal Server Error"
+        })
+    }
 });
 
 router.get("/elements",(req,res)=>{
