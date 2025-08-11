@@ -17,6 +17,7 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.13.0",
-    "prisma": "^6.13.0"
+    "prisma": "^6.13.0",
+    "zod": "^4.0.17"
   }
 }
