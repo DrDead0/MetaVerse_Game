@@ -15,7 +15,7 @@ export const SigninSchema = z.object({
 });
 
 export const UpdateMetaDataSchema = z.object({
-    avatar:z.string(),
+    avatarId:z.string(),
 });
 
 export const CrateSpaceSchema = z.object({

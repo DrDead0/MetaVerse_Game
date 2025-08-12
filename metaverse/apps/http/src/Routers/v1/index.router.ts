@@ -89,7 +89,15 @@ router.get("/avatars",(req,res)=>{
         message:"avatars"
     })
 })
+declare global {
+    namespace Express{
+        export interface Request{
+            role?:"Admin"|"User";
+            userId?: string;
+        }
 
+    }
+}
 router.use("/user",userRouter)
 router.use("/space",spaceRouter)
 router.use("/admin",adminRouter)
