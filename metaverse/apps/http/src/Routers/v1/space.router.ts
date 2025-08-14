@@ -1,11 +1,66 @@
 import { Router } from "express";
+import { CrateSpaceSchema } from "../../types";
 export const spaceRouter = Router();
+import client from "@repo/db";
+import { userMiddleware } from "../../middleware/user.middleware";
 
+spaceRouter.post("/",  userMiddleware, async (req, res) => {  
+    const parseData = CrateSpaceSchema.safeParse(req.body);
+    if(!parseData.success){
+        return res.status(400).json({
+            message:"Validation Failed"
+        })
+    }
+    if(!parseData.data.mapId){
+        await client.space.create({
+           data:{
+            name: parseData.data.name,
+            width: parseInt(parseData.data.dimension.split("x")[0]),
+            height: parseInt(parseData.data.dimension.split("x")[1]),
+            //if the test case fails, then use parseData instead and check again is it working or not
 
-spaceRouter.post("/", (req, res) => {  
-    res.json({
-        message:"space Created"
+            creatorId: req.userId! 
+           }
+        });
+        return res.json({
+            message:"Space Created "
+        })
+    }
+    const map = await client.map.findUnique({
+        where:{
+            id:parseData.data.mapId,
+        },
+        select:{
+            mapElements:true,
+        }
     })
+    if(!map){
+        return res.status(404).json({
+            message:"Map Not Found"
+        })
+    }
+    const space = await client.$transaction([
+        client.space.create({
+            data:{
+                name: parseData.data.name,
+                width: parseInt(parseData.data.dimension.split("x")[0]),
+                height: parseInt(parseData.data.dimension.split("x")[1]),
+                creatorId: req.userId!
+            }
+        }),
+        client.spaceElements.createMany({
+            data: map.mapElements.map(element => ({
+                elementId: element.elementId!,
+                spaceId: '', // Will be set after space creation
+                x: element.x!,
+                y: element.y!
+            }))
+        })
+    ]);
+    
+    // res.json({
+    //     spaceId: space[0].id
+    // });
 });
 
 
@@ -23,5 +78,8 @@ spaceRouter.post("/elements", (req, res) => {
 spaceRouter.delete("/elements", (req, res) => {  
 });
 
-spaceRouter.get("/:spaceId", (req, res) => {  
-});
+spaceRouter.get("/:spaceId", (req, res) => { 
+    return res.json({
+        message:"hahahah"
+    }) 
+})
