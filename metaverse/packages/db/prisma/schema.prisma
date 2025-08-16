@@ -67,6 +67,7 @@ model Map {
   id     String  @id @unique @default(cuid())
   width  Int
   height Int
+  thumbnail   String 
   name   String
   mapElements MapElements[]
 }
