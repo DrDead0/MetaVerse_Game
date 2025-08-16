@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { id } from "zod/v4/locales/index.cjs";
 
 export const SignupSchema = z.object({
     username: z.string(),
@@ -23,6 +24,9 @@ export const CrateSpaceSchema = z.object({
     dimension:z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/),
     mapId: z.string(),
 });
+export const DeleteElementSchema = z.object({
+    id: z.string()
+})
 
 export const AddElementSchema = z.object({
     spaceId:z.string(),
