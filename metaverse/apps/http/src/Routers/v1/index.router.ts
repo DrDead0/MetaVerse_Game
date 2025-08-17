@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { userRouter } from "./user.router.js";
 import { spaceRouter } from "./space.router.js";
 import { adminRouter } from "./admin.router.js";
-import { SignupSchema, SigninSchema } from "../../types/index.js";
+import { SignupSchema, SigninSchema, CreateAvatarSchema } from "../../types/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import client from "@repo/db";
@@ -78,15 +78,27 @@ router.post("/signin", async(req: Request, res: Response) => {
     }
 });
 
-router.get("/elements",(req,res)=>{
-    res.json({
-        message:"elements"
+router.get("/elements",async (req,res)=>{
+    const elements = await client.element.findMany()
+    return res.json({
+        elements:  elements.map(e=>({
+            id: e.id,
+            imageUrl: e.imageUrl,
+            width: e.width,
+            height: e.height,
+            // static: e.static
+        }))
     })
 })
 
-router.get("/avatars",(req,res)=>{
-    res.json({
-        message:"avatars"
+router.get("/avatars",async(req,res)=>{
+    const avatars =  await client.avatar.findMany()
+    return res.json({
+        avatars: avatars.map(a=>({
+            id: a.id,
+            name: a.name,
+            imageUrl: a.imageUrl
+        }))
     })
 })
 declare global {

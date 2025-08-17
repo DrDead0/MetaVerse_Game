@@ -12,7 +12,7 @@ import { UpdateMetaDataSchema } from "../../types/index.js";
 import client from "@repo/db";
 import { userMiddleware } from "../../middleware/user.middleware.js";
 export const userRouter = Router();
-userRouter.get("/metadata", userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+userRouter.post("/metadata", userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const parseData = UpdateMetaDataSchema.safeParse(req.body);
     if (!parseData.success) {
         return res.status(400).json({
@@ -31,7 +31,7 @@ userRouter.get("/metadata", userMiddleware, (req, res) => __awaiter(void 0, void
         message: "User Profile"
     });
 }));
-userRouter.get("/metadata/bulk", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+userRouter.get("/metadata/bulk", userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const userIdString = ((_a = req.query.ids) !== null && _a !== void 0 ? _a : "[]");
     const userIds = userIdString.replace(/[\[\]]/g, '').split(",");

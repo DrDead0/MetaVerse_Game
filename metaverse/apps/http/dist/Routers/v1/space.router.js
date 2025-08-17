@@ -20,7 +20,7 @@ spaceRouter.post("/", userMiddleware, (req, res) => __awaiter(void 0, void 0, vo
             message: "Validation Failed"
         });
     }
-    if (!parseData.data.mapId) {
+    if (!parseData.data.mapId || parseData.data.mapId === "") {
         const space = yield client.space.create({
             data: {
                 name: parseData.data.name,
@@ -140,7 +140,13 @@ spaceRouter.post("/elements", userMiddleware, (req, res) => __awaiter(void 0, vo
     if (!space) {
         return res.status(400).json({ message: "space not found" });
     }
-    yield client.spaceElements.createMany({
+    // Check if element position is within space boundaries
+    if (parseData.data.x >= space.width || parseData.data.y >= (space.height || 0)) {
+        return res.status(400).json({
+            message: "Element position is outside space boundaries"
+        });
+    }
+    yield client.spaceElements.create({
         data: {
             spaceId: parseData.data.spaceId,
             elementId: parseData.data.elementId,
@@ -168,8 +174,8 @@ spaceRouter.delete("/elements", userMiddleware, (req, res) => __awaiter(void 0, 
         }
     });
     if (!(spaceElement === null || spaceElement === void 0 ? void 0 : spaceElement.space.creatorId) || spaceElement.space.creatorId !== req.userId) {
-        return res.json({
-            message: "Space Not Found"
+        return res.status(403).json({
+            message: "You are not allowed to delete this element"
         });
     }
     yield client.spaceElements.delete({
@@ -207,7 +213,7 @@ spaceRouter.get("/:spaceId", (req, res) => __awaiter(void 0, void 0, void 0, fun
         });
     }
     return res.json({
-        dimension: `${space.width}x${space.height}`,
+        dimensions: `${space.width}x${space.height}`,
         elements: space.space.map((e) => ({
             id: e.id,
             element: {

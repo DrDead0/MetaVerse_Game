@@ -4,7 +4,7 @@ import client from "@repo/db";
 import { userMiddleware } from "../../middleware/user.middleware.js";
 export const userRouter = Router();
 
-userRouter.get("/metadata", userMiddleware, async(req, res) => {
+userRouter.post("/metadata", userMiddleware, async(req, res) => {
     const parseData = UpdateMetaDataSchema.safeParse(req.body);
     if(!parseData.success){
          return res.status(400).json({
@@ -25,7 +25,7 @@ userRouter.get("/metadata", userMiddleware, async(req, res) => {
 });
 
 
-userRouter.get("/metadata/bulk",async (req,res)=>{
+userRouter.get("/metadata/bulk", userMiddleware, async (req,res)=>{
     const userIdString = (req.query.ids ?? "[]") as string;
     const userIds = userIdString.replace(/[\[\]]/g, '').split(",");
     

@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Router } from "express";
 import { adminMiddleware } from "../../middleware/admin.middleware.js";
-import { AddElementSchema, CreateElementSchema, UpdateElementSchema, CreateAvatarSchema, CreateMapSchema} from "../../types";
+import { AddElementSchema, CreateElementSchema, UpdateElementSchema, CreateAvatarSchema, CreateMapSchema} from "../../types/index.js";
 import client from "@repo/db";
 
 export const adminRouter = Router();
@@ -19,8 +19,8 @@ adminRouter.post("/elements",adminMiddleware,async(req,res)=>{
             width:parseData.data.width,
             height:parseData.data.height,
             imageUrl:parseData.data.imageUrl, 
-            // static:parseData.data.static,
-        }
+            static:parseData.data.static,
+        } as any
     })
     return res.json({
         id: element.id
@@ -73,15 +73,23 @@ adminRouter.post("/avatar",adminMiddleware,async(req,res)=>{
         id: avatar.id
     })
 })
-adminRouter.get("/:map",adminMiddleware,async(req,res)=>{
-
+adminRouter.get("/maps",adminMiddleware,async(req,res)=>{
+    const maps = await client.map.findMany();
+    return res.json({
+        maps: maps.map(m => ({
+            id: m.id,
+            name: m.name,
+            thumbnail: (m as any).thumbnail,
+            dimension: `${m.width}x${m.height}`
+        }))
+    });
 })
 
 
 
 // route---> api/v1/space
 
-adminRouter.get(":spaceId",adminMiddleware,async(req,res)=>{
+adminRouter.post("/map",adminMiddleware,async(req,res)=>{
     const parseData = CreateMapSchema.safeParse(req.body);
     if(!parseData.success){
         return res.status(400).json(
@@ -103,9 +111,11 @@ adminRouter.get(":spaceId",adminMiddleware,async(req,res)=>{
                     y: el.y
                 }))
             }
-        }
+        } as any
     })
-    
+    return res.json({
+        id: map.id
+    })
 })
 
 

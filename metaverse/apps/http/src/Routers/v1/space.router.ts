@@ -13,7 +13,7 @@ spaceRouter.post("/",  userMiddleware, async (req, res) => {
             message:"Validation Failed"
         })
     }
-    if(!parseData.data.mapId){
+    if(!parseData.data.mapId || parseData.data.mapId === ""){
        const space = await client.space.create({
            data:{
             name: parseData.data.name,
@@ -141,7 +141,14 @@ spaceRouter.post("/elements",userMiddleware, async(req, res) => {
     if(!space){
         return res.status(400).json({message:"space not found"})
     }
-    await client.spaceElements.createMany({
+    // Check if element position is within space boundaries
+    if (parseData.data.x >= space.width || parseData.data.y >= (space.height || 0)) {
+        return res.status(400).json({
+            message: "Element position is outside space boundaries"
+        });
+    }
+    
+    await client.spaceElements.create({
         data:{
             spaceId: parseData.data.spaceId,
             elementId: parseData.data.elementId,
@@ -171,8 +178,8 @@ spaceRouter.delete("/elements",userMiddleware, async(req, res) => {
         }
     })
     if(!spaceElement?.space.creatorId || spaceElement.space.creatorId !== req.userId){
-        return res.json({
-            message:"Space Not Found"
+        return res.status(403).json({
+            message:"You are not allowed to delete this element"
         })
     }
     await client.spaceElements.delete({
@@ -212,7 +219,7 @@ spaceRouter.get("/:spaceId",async (req, res) => {
         })
     }
     return res.json({
-        dimension:`${space.width}x${space.height}`,
+        dimensions:`${space.width}x${space.height}`,
         elements: space.space.map((e: any)=>({
             id: e.id,
             element: {

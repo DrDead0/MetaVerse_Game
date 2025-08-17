@@ -83,16 +83,28 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
     }
 }));
-router.get("/elements", (req, res) => {
-    res.json({
-        message: "elements"
+router.get("/elements", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const elements = yield client.element.findMany();
+    return res.json({
+        elements: elements.map(e => ({
+            id: e.id,
+            imageUrl: e.imageUrl,
+            width: e.width,
+            height: e.height,
+            // static: e.static
+        }))
     });
-});
-router.get("/avatars", (req, res) => {
-    res.json({
-        message: "avatars"
+}));
+router.get("/avatars", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const avatars = yield client.avatar.findMany();
+    return res.json({
+        avatars: avatars.map(a => ({
+            id: a.id,
+            name: a.name,
+            imageUrl: a.imageUrl
+        }))
     });
-});
+}));
 router.use("/user", userRouter);
 router.use("/space", spaceRouter);
 router.use("/admin", adminRouter);
