@@ -33,7 +33,7 @@ router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function*
                 role: parseData.data.type === "admin" ? "Admin" : "User"
             }
         });
-        return res.json({
+        return res.status(200).json({
             userId: user.id
         });
     }
@@ -72,7 +72,7 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
             userId: user.id,
             role: user.role
         }, JWT_PASSWORD);
-        return res.json({
+        return res.status(200).json({
             token
         });
     }
@@ -85,7 +85,7 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
 }));
 router.get("/elements", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const elements = yield client.element.findMany();
-    return res.json({
+    return res.status(200).json({
         elements: elements.map(e => ({
             id: e.id,
             imageUrl: e.imageUrl,
@@ -97,7 +97,7 @@ router.get("/elements", (req, res) => __awaiter(void 0, void 0, void 0, function
 }));
 router.get("/avatars", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const avatars = yield client.avatar.findMany();
-    return res.json({
+    return res.status(200).json({
         avatars: avatars.map(a => ({
             id: a.id,
             name: a.name,

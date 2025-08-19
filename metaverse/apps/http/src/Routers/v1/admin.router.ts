@@ -33,23 +33,23 @@ adminRouter.put("/elements/:elementId",adminMiddleware,async(req,res)=>{
             message:"Validation Failed"
         })
     }
-    const element = await client.element.update({
-        where:{
-            id: req.params.elementId,
-
-        }, 
-        data:{
-            imageUrl: parseData.data.imageUrl,
-        }
-    })
-    if(!element){
-        return res.status(400.).json({
+    try {
+        const element = await client.element.update({
+            where:{
+                id: req.params.elementId,
+            }, 
+            data:{
+                imageUrl: parseData.data.imageUrl,
+            }
+        })
+        res.status(200).json({
+            message:"Element Updated"
+        })
+    } catch (error) {
+        return res.status(404).json({
             message:"Element Not Found"
         })
     }
-    res.status(200).json({
-        message:"Element Updated"
-    })
 })
 adminRouter.post("/avatar",adminMiddleware,async(req,res)=>{
     const parseData = CreateAvatarSchema.safeParse(req.body);

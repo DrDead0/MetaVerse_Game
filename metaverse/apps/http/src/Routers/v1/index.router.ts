@@ -26,7 +26,7 @@ router.post("/signup", async (req: Request, res: Response) => {
                 role: parseData.data.type === "admin" ? "Admin" : "User"
             }
         })
-        return res.json({
+        return res.status(200).json({
             userId: user.id
         })
     }catch(err){
@@ -65,7 +65,7 @@ router.post("/signin", async(req: Request, res: Response) => {
             userId: user.id,
             role: user.role
        },JWT_PASSWORD);
-        return res.json({
+        return res.status(200).json({
             token
         })
 
@@ -80,7 +80,7 @@ router.post("/signin", async(req: Request, res: Response) => {
 
 router.get("/elements",async (req,res)=>{
     const elements = await client.element.findMany()
-    return res.json({
+    return res.status(200).json({
         elements:  elements.map(e=>({
             id: e.id,
             imageUrl: e.imageUrl,
@@ -93,7 +93,7 @@ router.get("/elements",async (req,res)=>{
 
 router.get("/avatars",async(req,res)=>{
     const avatars =  await client.avatar.findMany()
-    return res.json({
+    return res.status(200).json({
         avatars: avatars.map(a=>({
             id: a.id,
             name: a.name,

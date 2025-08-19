@@ -14,6 +14,11 @@ spaceRouter.post("/",  userMiddleware, async (req, res) => {
         })
     }
     if(!parseData.data.mapId || parseData.data.mapId === ""){
+       if(!parseData.data.dimension){
+           return res.status(400).json({
+               message:"Dimension is required when mapId is not provided"
+           })
+       }
        const space = await client.space.create({
            data:{
             name: parseData.data.name,
@@ -81,13 +86,14 @@ spaceRouter.delete("/:spaceId",userMiddleware, async(req, res) => {
         select:{
             creatorId:true
         }
-    });if(!space){
-        return res.status(400).json({
+    });
+    if(!space){
+        return res.status(404).json({
             message:"Space Not Found"
         })
     }
     if(space.creatorId !== req.userId){
-        return res.status(403).json({
+        return res.status(400).json({
             message:"You are not allowed to delete this space"
         })
     }

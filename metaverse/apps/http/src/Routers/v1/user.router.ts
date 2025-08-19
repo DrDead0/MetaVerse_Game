@@ -11,6 +11,20 @@ userRouter.post("/metadata", userMiddleware, async(req, res) => {
             message:"Validation Failed"
         })
     }
+    
+    // Check if avatar exists
+    const avatar = await client.avatar.findUnique({
+        where: {
+            id: parseData.data.avatarId
+        }
+    });
+    
+    if (!avatar) {
+        return res.status(400).json({
+            message: "Avatar not found"
+        });
+    }
+    
    await client.user.update({
         where:{
             id: req.userId,

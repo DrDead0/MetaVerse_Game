@@ -21,8 +21,8 @@ export const UpdateMetaDataSchema = z.object({
 
 export const CrateSpaceSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    dimension:z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/),
-    mapId: z.string(),
+    dimension:z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/).optional(),
+    mapId: z.string().optional(),
 });
 export const DeleteElementSchema = z.object({
     id: z.string()
