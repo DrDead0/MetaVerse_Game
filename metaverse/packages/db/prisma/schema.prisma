@@ -81,7 +81,6 @@ model MapElements {
   y         Int?
   map       Map @relation(fields: [mapId], references: [id])
   element   Element? @relation(fields: [elementId], references: [id])
-  @@unique([mapId, elementId])
 }
 
 

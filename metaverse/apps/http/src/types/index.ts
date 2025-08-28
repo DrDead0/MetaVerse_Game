@@ -2,7 +2,7 @@ import { z } from "zod";
 import { id } from "zod/v4/locales/index.cjs";
 
 export const SignupSchema = z.object({
-    username: z.string(),
+    username: z.string().min(1, "Username is required"),
     password:z.string().min(8),
     type:z.enum(["user","admin"]),
 
@@ -23,6 +23,14 @@ export const CrateSpaceSchema = z.object({
     name: z.string().min(1, "Name is required"),
     dimension:z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/).optional(),
     mapId: z.string().optional(),
+}).refine((data) => {
+    // If no mapId is provided, dimension is required
+    if (!data.mapId || data.mapId === "") {
+        return data.dimension !== undefined && data.dimension !== "";
+    }
+    return true;
+}, {
+    message: "Dimension is required when mapId is not provided"
 });
 export const DeleteElementSchema = z.object({
     id: z.string()

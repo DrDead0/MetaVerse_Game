@@ -45,7 +45,7 @@ userRouter.post("/metadata", userMiddleware, (req, res) => __awaiter(void 0, voi
 userRouter.get("/metadata/bulk", userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const userIdString = ((_a = req.query.ids) !== null && _a !== void 0 ? _a : "[]");
-    const userIds = userIdString.replace(/[\[\]]/g, '').split(",");
+    const userIds = userIdString.replace(/[\[\]]/g, '').split(",").filter(id => id.trim() !== '');
     const metadata = yield client.user.findMany({
         where: {
             id: {
@@ -61,7 +61,7 @@ userRouter.get("/metadata/bulk", userMiddleware, (req, res) => __awaiter(void 0,
             var _a;
             return ({
                 userId: m.id,
-                imageUrl: (_a = m.Avatar) === null || _a === void 0 ? void 0 : _a.imageUrl // Fix: Changed from avatarId to imageUrl
+                imageUrl: (_a = m.Avatar) === null || _a === void 0 ? void 0 : _a.imageUrl
             });
         })
     });

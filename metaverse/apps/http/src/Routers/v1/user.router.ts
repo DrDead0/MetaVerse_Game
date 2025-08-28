@@ -41,7 +41,7 @@ userRouter.post("/metadata", userMiddleware, async(req, res) => {
 
 userRouter.get("/metadata/bulk", userMiddleware, async (req,res)=>{
     const userIdString = (req.query.ids ?? "[]") as string;
-    const userIds = userIdString.replace(/[\[\]]/g, '').split(",");
+    const userIds = userIdString.replace(/[\[\]]/g, '').split(",").filter(id => id.trim() !== '');
     
     const metadata = await client.user.findMany({
         where:{
@@ -56,7 +56,7 @@ userRouter.get("/metadata/bulk", userMiddleware, async (req,res)=>{
     res.json({
         avatars: metadata.map(m => ({
             userId: m.id,
-            imageUrl: m.Avatar?.imageUrl  // Fix: Changed from avatarId to imageUrl
+            imageUrl: m.Avatar?.imageUrl
         }))
     });
 });

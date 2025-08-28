@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { Router } from "express";
 import { AddElementSchema, CrateSpaceSchema, DeleteElementSchema } from "../../types/index.js";
-;
 export const spaceRouter = Router();
 import client from "@repo/db";
 import { userMiddleware } from "../../middleware/user.middleware.js";
@@ -21,17 +20,11 @@ spaceRouter.post("/", userMiddleware, (req, res) => __awaiter(void 0, void 0, vo
         });
     }
     if (!parseData.data.mapId || parseData.data.mapId === "") {
-        if (!parseData.data.dimension) {
-            return res.status(400).json({
-                message: "Dimension is required when mapId is not provided"
-            });
-        }
         const space = yield client.space.create({
             data: {
                 name: parseData.data.name,
                 width: parseInt(parseData.data.dimension.split("x")[0]),
                 height: parseInt(parseData.data.dimension.split("x")[1]),
-                //if the test case fails, then use parseData instead and check again is it working or not
                 creatorId: req.userId
             }
         });
@@ -54,27 +47,22 @@ spaceRouter.post("/", userMiddleware, (req, res) => __awaiter(void 0, void 0, vo
             message: "Map Not Found"
         });
     }
-    const space = yield client.$transaction(() => __awaiter(void 0, void 0, void 0, function* () {
-        const space = yield client.space.create({
-            data: {
-                name: parseData.data.name,
-                // width: parseInt(parseData.data.dimension.split("x")[0]),
-                // height: parseInt(parseData.data.dimension.split("x")[1]),
-                width: map.width,
-                height: map.height,
-                creatorId: req.userId
-            }
-        });
-        yield client.spaceElements.createMany({
-            data: map.mapElements.map(e => ({
-                spaceId: space.id,
-                elementId: e.elementId,
-                x: e.x,
-                y: e.y
-            }))
-        });
-        return space;
-    }));
+    const space = yield client.space.create({
+        data: {
+            name: parseData.data.name,
+            width: map.width,
+            height: map.height,
+            creatorId: req.userId
+        }
+    });
+    yield client.spaceElements.createMany({
+        data: map.mapElements.map(e => ({
+            spaceId: space.id,
+            elementId: e.elementId,
+            x: e.x,
+            y: e.y
+        }))
+    });
     return res.json({
         spaceId: space.id
     });
@@ -92,7 +80,7 @@ spaceRouter.delete("/:spaceId", userMiddleware, (req, res) => __awaiter(void 0, 
         }
     });
     if (!space) {
-        return res.status(404).json({
+        return res.status(400).json({
             message: "Space Not Found"
         });
     }
@@ -178,7 +166,12 @@ spaceRouter.delete("/elements", userMiddleware, (req, res) => __awaiter(void 0, 
             space: true
         }
     });
-    if (!(spaceElement === null || spaceElement === void 0 ? void 0 : spaceElement.space.creatorId) || spaceElement.space.creatorId !== req.userId) {
+    if (!spaceElement) {
+        return res.status(400).json({
+            message: "Element not found"
+        });
+    }
+    if (spaceElement.space.creatorId !== req.userId) {
         return res.status(403).json({
             message: "You are not allowed to delete this element"
         });
@@ -229,6 +222,6 @@ spaceRouter.get("/:spaceId", (req, res) => __awaiter(void 0, void 0, void 0, fun
             },
             x: e.x,
             y: e.y
-        })),
+        }))
     });
 }));

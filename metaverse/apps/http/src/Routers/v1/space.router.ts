@@ -1,5 +1,5 @@
 import e, { Router } from "express";
-import { AddElementSchema, CrateSpaceSchema,DeleteElementSchema } from "../../types/index.js";;
+import { AddElementSchema, CrateSpaceSchema,DeleteElementSchema } from "../../types/index.js";
 export const spaceRouter = Router();
 import client from "@repo/db";
 import { userMiddleware } from "../../middleware/user.middleware.js";
@@ -14,17 +14,11 @@ spaceRouter.post("/",  userMiddleware, async (req, res) => {
         })
     }
     if(!parseData.data.mapId || parseData.data.mapId === ""){
-       if(!parseData.data.dimension){
-           return res.status(400).json({
-               message:"Dimension is required when mapId is not provided"
-           })
-       }
        const space = await client.space.create({
            data:{
             name: parseData.data.name,
-            width: parseInt(parseData.data.dimension.split("x")[0]),
-            height: parseInt(parseData.data.dimension.split("x")[1]),
-            //if the test case fails, then use parseData instead and check again is it working or not
+            width: parseInt(parseData.data.dimension!.split("x")[0]),
+            height: parseInt(parseData.data.dimension!.split("x")[1]),
             creatorId: req.userId! 
            }
         });
@@ -47,28 +41,23 @@ spaceRouter.post("/",  userMiddleware, async (req, res) => {
             message:"Map Not Found"
         })
     }
-    const space = await client.$transaction(async()=>{
-        const space = await  client.space.create({
-            data:{
-                name: parseData.data.name,
-                // width: parseInt(parseData.data.dimension.split("x")[0]),
-                // height: parseInt(parseData.data.dimension.split("x")[1]),
-                width:map.width ,
-                height:map.height,
-                creatorId: req.userId!
-            }
-        })
-        await client.spaceElements.createMany({
-            data: map.mapElements.map(e => ({
-                spaceId: space.id, 
-                elementId: e.elementId!,
-                x: e.x!,
-                y: e.y!
-            }))
-        })
-        return space;
-        
-    });
+    const space = await client.space.create({
+        data:{
+            name: parseData.data.name,
+            width:map.width ,
+            height:map.height,
+            creatorId: req.userId!
+        }
+    })
+    
+    await client.spaceElements.createMany({
+        data: map.mapElements.map(e => ({
+            spaceId: space.id, 
+            elementId: e.elementId!,
+            x: e.x!,
+            y: e.y!
+        }))
+    })
     return res.json({
         spaceId: space.id
     })
@@ -88,7 +77,7 @@ spaceRouter.delete("/:spaceId",userMiddleware, async(req, res) => {
         }
     });
     if(!space){
-        return res.status(404).json({
+        return res.status(400).json({
             message:"Space Not Found"
         })
     }
@@ -183,7 +172,12 @@ spaceRouter.delete("/elements",userMiddleware, async(req, res) => {
             space: true
         }
     })
-    if(!spaceElement?.space.creatorId || spaceElement.space.creatorId !== req.userId){
+    if(!spaceElement){
+        return res.status(400).json({
+            message:"Element not found"
+        })
+    }
+    if(spaceElement.space.creatorId !== req.userId){
         return res.status(403).json({
             message:"You are not allowed to delete this element"
         })
@@ -237,7 +231,6 @@ spaceRouter.get("/:spaceId",async (req, res) => {
             },
             x: e.x,
             y: e.y
-        })),
-        
+        }))
     })
 })
